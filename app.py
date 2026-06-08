@@ -29,13 +29,14 @@ Session(app)
 print("DATABASE URI:")
 print(app.config.get("SQLALCHEMY_DATABASE_URI"))
 init_db(app)
+wait_for_database(app)
 
 def wait_for_database(app, retries=10, delay=3):
     with app.app_context():
         for i in range(retries):
             try:
-                db.create_all()
-                print("✅ Database connection successful!")
+                with app.app_context():
+                    print("✅ Database connection successful!")
                 return
             except OperationalError as e:
                 print(f"⚠️ Database not ready (attempt {i+1}/{retries}): {e}")
@@ -628,4 +629,5 @@ def health_check():
 
 # ---------------- Run ----------------
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
