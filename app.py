@@ -197,12 +197,6 @@ def index():
         return redirect(url_for('dashboard'))
     return redirect(url_for('signin'))
 
-@app.route("/health")
-def health():
-    return {
-        "status": "ok"
-    }, 200
-
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
@@ -626,6 +620,11 @@ def export_workout_data():
     output = si.getvalue()
     return Response(output, mimetype='text/csv',
                    headers={"Content-Disposition": "attachment;filename=workout_data.csv"})
+    
+@app.route('/health')
+def health_check():
+    """Quick health check for Railway"""
+    return "OK", 200
 
 # ---------------- Run ----------------
 if __name__ == '__main__':
