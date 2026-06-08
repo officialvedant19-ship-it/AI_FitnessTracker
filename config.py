@@ -6,17 +6,22 @@ load_dotenv()
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
 
-    db_url = os.getenv("MYSQL_URL")
+    # Try to get the public database URL (preferred for Railway)
+    db_url = os.getenv("DATABASE_PUBLIC_URL") or os.getenv("MYSQL_URL")
 
     if db_url and db_url.startswith("mysql://"):
-        db_url = db_url.replace(
-            "mysql://",
-            "mysql+pymysql://",
-            1
-        )
+        db_url = db_url.replace("mysql://", "mysql+pymysql://", 1)
+
+    # If neither URL is set, fall back to individual components
+    if not db_url:
+        MYSQL_HOST = os.getenv("MYSQLHOST", "localhost")
+        MYSQL_USER = os.getenv("MYSQLUSER", "root")
+        MYSQL_PASSWORD = os.getenv("MYSQLPASSWORD", "")
+        MYSQL_DB = os.getenv("MYSQLDATABASE", "railway")
+        MYSQL_PORT = os.getenv("MYSQLPORT", "3306")
+        db_url = f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB}"
 
     SQLALCHEMY_DATABASE_URI = db_url
-
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     SQLALCHEMY_ENGINE_OPTIONS = {

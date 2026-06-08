@@ -9,6 +9,7 @@ import base64
 from datetime import datetime, timedelta
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.exc import OperationalError
 
 # Import configurations and models
 from config import config
@@ -28,6 +29,18 @@ Session(app)
 print("DATABASE URI:")
 print(app.config.get("SQLALCHEMY_DATABASE_URI"))
 init_db(app)
+
+def wait_for_database(app, retries=10, delay=3):
+    with app.app_context():
+        for i in range(retries):
+            try:
+                db.create_all()
+                print("✅ Database connection successful!")
+                return
+            except OperationalError as e:
+                print(f"⚠️ Database not ready (attempt {i+1}/{retries}): {e}")
+                time.sleep(delay)
+    raise Exception("❌ Could not connect to the database after multiple retries.")
 
 # Create tables if they don't exist
 with app.app_context():
