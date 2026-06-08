@@ -6,13 +6,13 @@ load_dotenv()
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
 
-    # Try to get the public database URL (preferred for Railway)
+    # 1. Prefer the public URL (Railway standard)
     db_url = os.getenv("DATABASE_PUBLIC_URL") or os.getenv("MYSQL_URL")
 
     if db_url and db_url.startswith("mysql://"):
         db_url = db_url.replace("mysql://", "mysql+pymysql://", 1)
 
-    # If neither URL is set, fall back to individual components
+    # 2. Fallback: build from individual variables (for local development)
     if not db_url:
         MYSQL_HOST = os.getenv("MYSQLHOST", "localhost")
         MYSQL_USER = os.getenv("MYSQLUSER", "root")
