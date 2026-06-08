@@ -197,6 +197,12 @@ def index():
         return redirect(url_for('dashboard'))
     return redirect(url_for('signin'))
 
+@app.route("/health")
+def health():
+    return {
+        "status": "ok"
+    }, 200
+
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
