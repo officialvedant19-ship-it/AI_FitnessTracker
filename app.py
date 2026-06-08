@@ -29,7 +29,6 @@ Session(app)
 print("DATABASE URI:")
 print(app.config.get("SQLALCHEMY_DATABASE_URI"))
 init_db(app)
-wait_for_database(app)
 
 def wait_for_database(app, retries=10, delay=3):
     with app.app_context():
