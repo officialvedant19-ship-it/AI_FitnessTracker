@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+users.json
+workout_history.json
+
+# Environment variables
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+*.pid
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Uploads
+uploads/
+videos/
+thumbnails/

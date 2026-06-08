@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: fitness_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: ai_fitness_db
+      MYSQL_USER: fitness_user
+      MYSQL_PASSWORD: Fitness@2025#Secure
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 5
+
+  redis:
+    image: redis:alpine
+    container_name: fitness_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+  web:
+    build: .
+    container_name: fitness_web
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_ENV: development
+      MYSQL_HOST: mysql
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:-super-secret-key-change-in-production}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - ./:/app
+    command: python app.py
+
+volumes:
+  mysql_data:
+  redis_data:

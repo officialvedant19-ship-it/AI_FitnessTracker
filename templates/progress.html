@@ -1,0 +1,497 @@
+{% extends "base.html" %}
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    /* ── PROGRESS ── */
+    .analytics-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-bottom: 24px;
+    }
+
+    .progress-charts-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    .chart-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 22px;
+    }
+
+    .chart-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    .chart-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .chart-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        font-size: 12px;
+    }
+
+    /* Full width chart */
+    .chart-full { grid-column: span 2; }
+
+    /* PR / Achievement cards */
+    .pr-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
+    }
+
+    .pr-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        transition: border-color 0.2s;
+    }
+
+    .pr-card:hover { border-color: var(--primary); }
+
+    .pr-medal {
+        font-size: 22px;
+        line-height: 1;
+    }
+
+    .pr-value {
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: -0.8px;
+        color: var(--primary);
+    }
+
+    .pr-exercise {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+    }
+
+    .pr-date {
+        font-size: 11px;
+        color: var(--text-3);
+    }
+
+    /* Heatmap */
+    .heatmap-grid {
+        display: flex;
+        gap: 3px;
+        flex-wrap: wrap;
+    }
+
+    .heatmap-cell {
+        width: 14px;
+        height: 14px;
+        border-radius: 3px;
+        background: var(--surface);
+        border: 1px solid var(--border-subtle);
+        transition: transform 0.1s;
+        cursor: default;
+    }
+
+    .heatmap-cell:hover { transform: scale(1.3); }
+    .heatmap-cell.level-1 { background: rgba(59,130,246,0.2); border-color: rgba(59,130,246,0.25); }
+    .heatmap-cell.level-2 { background: rgba(59,130,246,0.4); border-color: rgba(59,130,246,0.35); }
+    .heatmap-cell.level-3 { background: rgba(59,130,246,0.65); border-color: rgba(59,130,246,0.5); }
+    .heatmap-cell.level-4 { background: var(--primary); border-color: rgba(59,130,246,0.8); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1100px) {
+        .analytics-stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 900px) {
+        .progress-charts-grid { grid-template-columns: 1fr; }
+        .chart-full { grid-column: span 1; }
+    }
+
+    @media (max-width: 600px) {
+        .analytics-stats-grid { grid-template-columns: repeat(2, 1fr); }
+        .pr-grid { grid-template-columns: repeat(2, 1fr); }
+        .heatmap-cell { width: 11px; height: 11px; }
+    }
+</style>
+
+<div class="fade-in">
+
+    <div class="page-header">
+        <div class="page-title-block">
+            <h1>Fitness Analytics</h1>
+            <p>Track your progress, trends, and personal records.</p>
+        </div>
+        <button onclick="exportData()" class="btn btn-ghost btn-sm">
+            <i class="fas fa-download"></i> Export CSV
+        </button>
+    </div>
+
+    <!-- Loading -->
+    <div id="loadingState" class="loader"></div>
+
+    <!-- Stats -->
+    <div id="statsSummary" style="display:none;">
+        <div class="analytics-stats-grid">
+            <div class="card card-sm" style="display:flex;flex-direction:column;gap:10px;">
+                <div class="flex items-center justify-between">
+                    <div class="chart-icon" style="background:var(--primary-dim);color:#60a5fa;width:30px;height:30px;border-radius:9px;">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <span class="badge badge-primary text-xs">total</span>
+                </div>
+                <div>
+                    <div class="stat-value" id="totalWorkouts">0</div>
+                    <div class="stat-label">Workouts</div>
+                </div>
+            </div>
+            <div class="card card-sm" style="display:flex;flex-direction:column;gap:10px;">
+                <div class="flex items-center justify-between">
+                    <div class="chart-icon" style="background:var(--success-dim);color:#4ade80;width:30px;height:30px;border-radius:9px;">
+                        <i class="fas fa-dumbbell"></i>
+                    </div>
+                    <span class="badge badge-success text-xs">reps</span>
+                </div>
+                <div>
+                    <div class="stat-value" id="totalReps">0</div>
+                    <div class="stat-label">Total Reps</div>
+                </div>
+            </div>
+            <div class="card card-sm" style="display:flex;flex-direction:column;gap:10px;">
+                <div class="flex items-center justify-between">
+                    <div class="chart-icon" style="background:var(--warning-dim);color:#fbbf24;width:30px;height:30px;border-radius:9px;">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <span class="badge badge-warning text-xs">kcal</span>
+                </div>
+                <div>
+                    <div class="stat-value" id="totalCalories">0</div>
+                    <div class="stat-label">Calories</div>
+                </div>
+            </div>
+            <div class="card card-sm" style="display:flex;flex-direction:column;gap:10px;">
+                <div class="flex items-center justify-between">
+                    <div class="chart-icon" style="background:rgba(139,92,246,.12);color:#a78bfa;width:30px;height:30px;border-radius:9px;">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <span class="badge text-xs" style="background:rgba(139,92,246,.12);color:#a78bfa;border-color:rgba(139,92,246,.2)">min</span>
+                </div>
+                <div>
+                    <div class="stat-value" id="totalMinutes">0</div>
+                    <div class="stat-label">Minutes Active</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div id="chartsContainer" style="display:none;">
+
+        <div class="progress-charts-grid">
+
+            <!-- Reps trend (full width) -->
+            <div class="chart-card chart-full">
+                <div class="chart-card-header">
+                    <div class="chart-title">
+                        <div class="chart-icon" style="background:var(--primary-dim);color:#60a5fa;">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        Daily Reps Trend
+                    </div>
+                    <span class="text-xs text-dim">Last 14 sessions</span>
+                </div>
+                <canvas id="repsChart" height="60"></canvas>
+            </div>
+
+            <!-- Calories -->
+            <div class="chart-card">
+                <div class="chart-card-header">
+                    <div class="chart-title">
+                        <div class="chart-icon" style="background:var(--warning-dim);color:#fbbf24;">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        Calories Burned
+                    </div>
+                </div>
+                <canvas id="caloriesChart" height="100"></canvas>
+            </div>
+
+            <!-- Exercise distribution -->
+            <div class="chart-card">
+                <div class="chart-card-header">
+                    <div class="chart-title">
+                        <div class="chart-icon" style="background:var(--success-dim);color:#4ade80;">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                        Exercise Mix
+                    </div>
+                </div>
+                <canvas id="exerciseChart" height="100"></canvas>
+            </div>
+
+            <!-- PRs (full width) -->
+            <div class="chart-card chart-full">
+                <div class="chart-card-header">
+                    <div class="chart-title">
+                        <div class="chart-icon" style="background:var(--warning-dim);color:#fbbf24;">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        Personal Records
+                    </div>
+                </div>
+                <div class="pr-grid" id="topWorkouts"></div>
+            </div>
+
+            <!-- Activity Heatmap (full width) -->
+            <div class="chart-card chart-full">
+                <div class="chart-card-header">
+                    <div class="chart-title">
+                        <div class="chart-icon" style="background:var(--primary-dim);color:#60a5fa;">
+                            <i class="fas fa-th"></i>
+                        </div>
+                        Activity Heatmap
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-dim">
+                        <span>Less</span>
+                        <div class="heatmap-cell"></div>
+                        <div class="heatmap-cell level-1"></div>
+                        <div class="heatmap-cell level-2"></div>
+                        <div class="heatmap-cell level-3"></div>
+                        <div class="heatmap-cell level-4"></div>
+                        <span>More</span>
+                    </div>
+                </div>
+                <div class="heatmap-grid" id="heatmapGrid"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- No data -->
+    <div id="noDataMessage" style="display:none;">
+        <div class="card">
+            <div class="empty-state">
+                <div class="empty-icon"><i class="fas fa-chart-line"></i></div>
+                <h3>No workout data yet</h3>
+                <p class="text-muted text-sm">Complete your first workout session to see analytics here.</p>
+                <a href="/workout" class="btn btn-primary mt-3">
+                    <i class="fas fa-play"></i> Start Your First Workout
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Chart.js global defaults
+    Chart.defaults.color = '#94a3b8';
+    Chart.defaults.borderColor = '#1e293b';
+    Chart.defaults.font.family = 'DM Sans, sans-serif';
+
+    const chartDefaults = {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: { labels: { color: '#94a3b8', font: { size: 12 } } },
+            tooltip: {
+                backgroundColor: '#1e293b',
+                borderColor: '#334155',
+                borderWidth: 1,
+                titleColor: '#f8fafc',
+                bodyColor: '#94a3b8',
+                padding: 10
+            }
+        }
+    };
+
+    fetch('/get_history')
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('loadingState').style.display = 'none';
+
+            if (!data || data.length === 0) {
+                document.getElementById('noDataMessage').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('statsSummary').style.display = 'block';
+            document.getElementById('chartsContainer').style.display = 'block';
+
+            // Totals
+            let totalWorkouts = data.length;
+            let totalReps = 0, totalCalories = 0, totalMinutes = 0;
+            data.forEach(w => {
+                totalReps     += w.reps      || 0;
+                totalCalories += w.calories  || 0;
+                totalMinutes  += Math.floor((w.duration || 0) / 60);
+            });
+
+            document.getElementById('totalWorkouts').innerText = totalWorkouts;
+            document.getElementById('totalReps').innerText     = totalReps;
+            document.getElementById('totalCalories').innerText = Math.round(totalCalories);
+            document.getElementById('totalMinutes').innerText  = totalMinutes;
+
+            // Group by date
+            const daily = {};
+            const exerciseCount = {};
+            const workoutDetails = [];
+
+            data.forEach(w => {
+                const date = new Date(w.timestamp).toLocaleDateString();
+                if (!daily[date]) daily[date] = { reps: 0, calories: 0, dateObj: new Date(w.timestamp) };
+                daily[date].reps     += w.reps     || 0;
+                daily[date].calories += w.calories || 0;
+
+                const ex = w.exercise || 'Unknown';
+                exerciseCount[ex] = (exerciseCount[ex] || 0) + 1;
+
+                workoutDetails.push({
+                    date:     new Date(w.timestamp),
+                    exercise: ex,
+                    reps:     w.reps,
+                    calories: w.calories
+                });
+            });
+
+            const sortedDates   = Object.keys(daily).sort((a, b) => new Date(a) - new Date(b));
+            const last14        = sortedDates.slice(-14);
+            const repsData      = last14.map(d => daily[d].reps);
+            const caloriesData  = last14.map(d => daily[d].calories);
+            const labels        = last14.map(d => {
+                const dt = new Date(d);
+                return `${dt.getMonth()+1}/${dt.getDate()}`;
+            });
+
+            // ── Reps Chart ──
+            new Chart(document.getElementById('repsChart'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Daily Reps',
+                        data: repsData,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59,130,246,0.08)',
+                        borderWidth: 2.5,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#3b82f6',
+                        pointBorderColor: '#0b1220',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    ...chartDefaults,
+                    scales: {
+                        y: { grid: { color: '#1e293b' }, ticks: { color: '#64748b' } },
+                        x: { grid: { color: '#1e293b' }, ticks: { color: '#64748b', maxRotation: 45 } }
+                    }
+                }
+            });
+
+            // ── Calories Chart ──
+            new Chart(document.getElementById('caloriesChart'), {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Calories Burned',
+                        data: caloriesData,
+                        backgroundColor: 'rgba(245,158,11,0.7)',
+                        borderRadius: 6,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    ...chartDefaults,
+                    scales: {
+                        y: { grid: { color: '#1e293b' }, ticks: { color: '#64748b' } },
+                        x: { grid: { color: '#1e293b' }, ticks: { color: '#64748b', maxRotation: 45 } }
+                    }
+                }
+            });
+
+            // ── Exercise doughnut ──
+            const exNames  = Object.keys(exerciseCount);
+            const exValues = exNames.map(e => exerciseCount[e]);
+            const exColors = ['#3b82f6','#22c55e','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899','#84cc16'];
+
+            new Chart(document.getElementById('exerciseChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: exNames,
+                    datasets: [{
+                        data: exValues,
+                        backgroundColor: exColors.slice(0, exNames.length),
+                        borderWidth: 0,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    ...chartDefaults,
+                    cutout: '65%',
+                    plugins: {
+                        ...chartDefaults.plugins,
+                        legend: { ...chartDefaults.plugins.legend, position: 'bottom' }
+                    }
+                }
+            });
+
+            // ── PRs ──
+            const medals = ['🥇','🥈','🥉','🏅','📌'];
+            const sorted = [...workoutDetails].sort((a, b) => b.reps - a.reps).slice(0, 6);
+            document.getElementById('topWorkouts').innerHTML = sorted.map((w, i) => `
+                <div class="pr-card">
+                    <div class="pr-medal">${medals[i] || '📌'}</div>
+                    <div class="pr-value">${w.reps}</div>
+                    <div class="pr-exercise">${w.exercise}</div>
+                    <div class="pr-date">${w.date.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>
+                </div>`).join('');
+
+            // ── Heatmap (last 84 days) ──
+            const heatmapEl = document.getElementById('heatmapGrid');
+            const now       = new Date();
+            const cells     = [];
+            for (let i = 83; i >= 0; i--) {
+                const d = new Date(now);
+                d.setDate(d.getDate() - i);
+                const key = d.toLocaleDateString();
+                const reps = daily[key] ? daily[key].reps : 0;
+                let level = 0;
+                if (reps > 0)   level = 1;
+                if (reps > 20)  level = 2;
+                if (reps > 50)  level = 3;
+                if (reps > 100) level = 4;
+                const dateStr = d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+                cells.push(`<div class="heatmap-cell level-${level}" title="${dateStr}: ${reps} reps"></div>`);
+            }
+            heatmapEl.innerHTML = cells.join('');
+        })
+        .catch(err => {
+            console.error(err);
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('noDataMessage').style.display = 'block';
+        });
+</script>
+{% endblock %}

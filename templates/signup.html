@@ -1,0 +1,389 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    /* Reuse auth styles from signin */
+    .container { padding: 0 !important; max-width: 100% !important; }
+
+    .auth-split {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        min-height: calc(100vh - var(--nav-h));
+    }
+
+    .auth-left {
+        background: linear-gradient(160deg, #0F172A 0%, #0B1220 60%, #111827 100%);
+        border-right: 1px solid var(--border);
+        padding: 3rem 3.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auth-left::before {
+        content: '';
+        position: absolute;
+        top: -100px;
+        left: -100px;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(34,197,94,0.07) 0%, transparent 60%);
+        pointer-events: none;
+    }
+
+    .auth-left::after {
+        content: '';
+        position: absolute;
+        bottom: -80px;
+        right: -80px;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 60%);
+        pointer-events: none;
+    }
+
+    .auth-product-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 5px 12px;
+        background: rgba(34,197,94,0.1);
+        border: 1px solid rgba(34,197,94,0.2);
+        border-radius: 100px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #86EFAC;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 1.75rem;
+        width: fit-content;
+    }
+
+    .auth-left h1 {
+        font-size: clamp(2rem, 3.5vw, 2.75rem);
+        font-weight: 700;
+        letter-spacing: -1px;
+        line-height: 1.15;
+        margin-bottom: 1rem;
+        color: var(--text);
+    }
+
+    .auth-left h1 span {
+        background: linear-gradient(135deg, #22C55E, #3B82F6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .auth-left > p {
+        font-size: 1rem;
+        color: var(--muted);
+        line-height: 1.65;
+        max-width: 380px;
+        margin-bottom: 2.5rem;
+    }
+
+    .benefit-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.875rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .benefit-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.875rem;
+        color: var(--text);
+    }
+
+    .benefit-check {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: rgba(34,197,94,0.15);
+        border: 1px solid rgba(34,197,94,0.3);
+        display: grid;
+        place-items: center;
+        font-size: 0.65rem;
+        color: var(--success);
+        flex-shrink: 0;
+    }
+
+    .trust-strip {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .trust-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.75rem;
+        color: var(--muted);
+    }
+
+    .trust-item i { color: var(--success); font-size: 0.7rem; }
+
+    /* Right: form */
+    .auth-right {
+        padding: 3rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: var(--surface);
+    }
+
+    .auth-form-wrap {
+        max-width: 400px;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .auth-form-header {
+        margin-bottom: 2rem;
+    }
+
+    .auth-form-header h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        margin-bottom: 6px;
+    }
+
+    .auth-form-header p {
+        font-size: 0.875rem;
+        color: var(--muted);
+        margin: 0;
+    }
+
+    .auth-form-group {
+        margin-bottom: 1rem;
+    }
+
+    .auth-form-group label {
+        display: block;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--muted);
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .auth-input-wrap { position: relative; }
+
+    .auth-input-wrap i {
+        position: absolute;
+        left: 13px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #475569;
+        font-size: 0.8rem;
+        pointer-events: none;
+    }
+
+    .auth-input-wrap input {
+        width: 100%;
+        padding: 11px 14px 11px 38px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        color: var(--text);
+        font-size: 0.9rem;
+        font-family: 'DM Sans', sans-serif;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .auth-input-wrap input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+    }
+
+    .auth-input-wrap input::placeholder { color: #475569; }
+
+    .auth-submit {
+        width: 100%;
+        padding: 13px;
+        border-radius: var(--radius);
+        background: var(--primary);
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 700;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 1.5rem;
+    }
+
+    .auth-submit:hover {
+        background: #2563EB;
+        box-shadow: 0 0 24px rgba(59,130,246,0.35);
+    }
+
+    .auth-terms {
+        font-size: 0.72rem;
+        color: var(--muted);
+        text-align: center;
+        margin-top: 1rem;
+        line-height: 1.5;
+    }
+
+    .auth-terms a {
+        color: var(--muted);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+
+    .auth-divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 1.5rem 0;
+    }
+
+    .auth-divider::before, .auth-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+    }
+
+    .auth-divider span {
+        font-size: 0.72rem;
+        color: var(--muted);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .auth-link-row {
+        text-align: center;
+        font-size: 0.85rem;
+        color: var(--muted);
+    }
+
+    .auth-link-row a {
+        color: var(--primary);
+        font-weight: 600;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .auth-link-row a:hover { color: #93C5FD; }
+
+    @media (max-width: 768px) {
+        .auth-split { grid-template-columns: 1fr; }
+        .auth-left { display: none; }
+        .auth-right { padding: 2rem 1.5rem; min-height: calc(100vh - var(--nav-h)); }
+    }
+</style>
+
+<div class="auth-split fade-in">
+
+    <!-- LEFT: Benefits -->
+    <div class="auth-left">
+        <div class="auth-product-badge">
+            <i class="fas fa-sparkles"></i> Free to start
+        </div>
+
+        <h1>Start training<br>smarter with<br><span>AI coaching</span></h1>
+
+        <p>Join thousands of athletes using AI-powered motion tracking and personalized coaching to reach their goals faster.</p>
+
+        <div class="benefit-list">
+            <div class="benefit-item">
+                <div class="benefit-check"><i class="fas fa-check"></i></div>
+                Real-time pose detection and form feedback
+            </div>
+            <div class="benefit-item">
+                <div class="benefit-check"><i class="fas fa-check"></i></div>
+                AI-powered rep counting — no wearables needed
+            </div>
+            <div class="benefit-item">
+                <div class="benefit-check"><i class="fas fa-check"></i></div>
+                Personalized workout plans and nutrition tips
+            </div>
+            <div class="benefit-item">
+                <div class="benefit-check"><i class="fas fa-check"></i></div>
+                Detailed progress analytics and personal records
+            </div>
+            <div class="benefit-item">
+                <div class="benefit-check"><i class="fas fa-check"></i></div>
+                9 exercise types tracked with joint angle analysis
+            </div>
+        </div>
+
+        <div class="trust-strip">
+            <div class="trust-item"><i class="fas fa-shield-halved"></i> Private & secure</div>
+            <div class="trust-item"><i class="fas fa-lock"></i> No data sold</div>
+            <div class="trust-item"><i class="fas fa-star"></i> Free forever</div>
+        </div>
+    </div>
+
+    <!-- RIGHT: Form -->
+    <div class="auth-right">
+        <div class="auth-form-wrap">
+            <div class="auth-form-header">
+                <h2>Create your account</h2>
+                <p>Get started for free — no credit card required.</p>
+            </div>
+
+            {% if error %}
+                <div class="error-message">
+                    <i class="fas fa-circle-xmark"></i> {{ error }}
+                </div>
+            {% endif %}
+
+            <form method="POST">
+                <div class="auth-form-group">
+                    <label>Full name</label>
+                    <div class="auth-input-wrap">
+                        <i class="fas fa-user"></i>
+                        <input type="text" name="name" placeholder="Jane Smith" required autocomplete="name">
+                    </div>
+                </div>
+                <div class="auth-form-group">
+                    <label>Email address</label>
+                    <div class="auth-input-wrap">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" name="email" placeholder="you@example.com" required autocomplete="email">
+                    </div>
+                </div>
+                <div class="auth-form-group">
+                    <label>Password</label>
+                    <div class="auth-input-wrap">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" name="password" placeholder="Create a strong password" required autocomplete="new-password">
+                    </div>
+                </div>
+
+                <button class="auth-submit" type="submit">
+                    Create Account <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <p class="auth-terms">
+                By signing up you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+            </p>
+
+            <div class="auth-divider"><span>or</span></div>
+
+            <div class="auth-link-row">
+                Already have an account? <a href="/signin">Sign in</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

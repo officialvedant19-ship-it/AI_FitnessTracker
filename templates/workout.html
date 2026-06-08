@@ -1,0 +1,1009 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    /* ─── WORKOUT STUDIO LAYOUT ─── */
+    .studio-layout {
+        display: grid;
+        grid-template-columns: 280px 1fr 260px;
+        gap: 1rem;
+        height: calc(100vh - var(--nav-h) - 4rem);
+        min-height: 600px;
+    }
+
+    /* ─── PANELS ─── */
+    .studio-panel {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .panel-header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+    .panel-header h3 { margin: 0; font-size: 0.875rem; }
+    .panel-header .panel-icon {
+        width: 26px; height: 26px;
+        border-radius: 6px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.7rem;
+    }
+
+    .panel-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1.25rem;
+    }
+
+    /* ─── LEFT PANEL: CONTROLS ─── */
+    .exercise-select-wrap {
+        margin-bottom: 1.25rem;
+    }
+
+    .exercise-select-wrap label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+    }
+
+    .custom-select {
+        width: 100%;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        color: var(--text);
+        font-family: inherit;
+        font-size: 0.875rem;
+        padding: 10px 14px;
+        cursor: pointer;
+        outline: none;
+        transition: all 0.15s;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394A3B8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 36px;
+    }
+
+    .custom-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-dim);
+    }
+
+    .ctrl-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .divider { height: 1px; background: var(--border); margin: 1rem 0; }
+
+    /* ─── LIVE STATS ─── */
+    .live-stat-block {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .live-stat-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--text-muted);
+        margin-bottom: 0.35rem;
+    }
+
+    .live-stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        color: var(--text);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .rep-counter-big {
+        font-size: 3.5rem;
+        font-weight: 800;
+        letter-spacing: -0.06em;
+        color: var(--success);
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* ─── FEEDBACK BOX ─── */
+    .feedback-box {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 0.875rem;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .feedback-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--success);
+        margin-top: 5px;
+        flex-shrink: 0;
+        animation: pulse-dot 2s infinite;
+    }
+
+    @keyframes pulse-dot {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+    }
+
+    .feedback-text {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+    }
+
+    .debug-badge {
+        font-family: 'DM Mono', monospace;
+        font-size: 0.7rem;
+        color: var(--success);
+        background: rgba(34,197,94,0.08);
+        border: 1px solid rgba(34,197,94,0.2);
+        padding: 6px 10px;
+        border-radius: 6px;
+        margin-top: 0.5rem;
+    }
+
+    /* ─── HISTORY LIST ─── */
+    .history-item {
+        padding: 0.625rem 0;
+        border-bottom: 1px solid var(--border-light);
+        font-size: 0.8rem;
+    }
+
+    .history-item:last-child { border-bottom: none; }
+    .history-item strong { color: var(--text); display: block; margin-bottom: 2px; }
+    .history-item span { color: var(--text-muted); }
+
+    /* ─── CENTER: VIDEO ─── */
+    .video-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        height: 100%;
+    }
+
+    .video-top-bar {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-shrink: 0;
+    }
+
+    .session-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--text-muted);
+    }
+
+    .status-dot.active {
+        background: var(--success);
+        animation: pulse-dot 1.5s infinite;
+    }
+
+    .status-text {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+
+    .video-meta-badges {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .meta-badge {
+        font-family: 'DM Mono', monospace;
+        font-size: 0.7rem;
+        font-weight: 500;
+        padding: 4px 10px;
+        border-radius: 6px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+    }
+
+    .meta-badge.live { color: var(--success); border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.07); }
+
+    .video-container {
+        flex: 1;
+        position: relative;
+        background: #000;
+        overflow: hidden;
+        min-height: 0;
+    }
+
+    #videoElement {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        object-fit: contain;
+        transform: scaleX(-1);
+        display: none;
+    }
+
+    #poseCanvas {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        pointer-events: none;
+        display: none;
+    }
+
+    /* Overlay elements */
+    .overlay-reps {
+        position: absolute;
+        bottom: 1.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 6rem;
+        font-weight: 800;
+        letter-spacing: -0.05em;
+        color: white;
+        text-shadow: 0 2px 20px rgba(0,0,0,0.8), 0 0 40px rgba(59,130,246,0.5);
+        pointer-events: none;
+        z-index: 5;
+        display: none;
+        font-variant-numeric: tabular-nums;
+        line-height: 1;
+    }
+
+    .angle-badge {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        background: rgba(11,18,32,0.85);
+        border: 1px solid var(--border);
+        color: #FDE68A;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-family: 'DM Mono', monospace;
+        font-size: 0.8rem;
+        z-index: 5;
+        display: none;
+        backdrop-filter: blur(8px);
+    }
+
+    .form-score-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(11,18,32,0.85);
+        border: 1px solid var(--border);
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        z-index: 5;
+        display: none;
+        backdrop-filter: blur(8px);
+        color: var(--success);
+    }
+
+    /* Camera Placeholder */
+    .camera-placeholder {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        color: var(--text-muted);
+        z-index: 3;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .camera-placeholder-icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 18px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+    }
+
+    .camera-placeholder h3 {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .camera-placeholder p {
+        font-size: 0.8rem;
+        max-width: 240px;
+        color: var(--text-muted);
+        line-height: 1.5;
+    }
+
+    /* ─── RIGHT PANEL: ANALYTICS ─── */
+    .analytics-metric {
+        margin-bottom: 1.25rem;
+    }
+
+    .analytics-metric-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .analytics-metric-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .analytics-metric-value {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text);
+        font-family: 'DM Mono', monospace;
+    }
+
+    .progress-bar-track {
+        height: 6px;
+        background: var(--surface);
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        border-radius: 3px;
+        transition: width 0.5s ease;
+    }
+
+    .joint-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .joint-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0.625rem;
+        text-align: center;
+    }
+
+    .joint-card-label {
+        font-size: 0.65rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.25rem;
+    }
+
+    .joint-card-value {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text);
+        font-family: 'DM Mono', monospace;
+    }
+
+    .rep-history-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border-light);
+        font-size: 0.8rem;
+    }
+
+    .rep-history-item:last-child { border-bottom: none; }
+    .rep-history-num { font-weight: 700; font-family: 'DM Mono', monospace; }
+    .rep-history-time { color: var(--text-muted); font-size: 0.75rem; }
+    .rep-quality { font-size: 0.7rem; font-weight: 600; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 1100px) {
+        .studio-layout {
+            grid-template-columns: 260px 1fr;
+            height: auto;
+        }
+        .right-panel { display: none; }
+    }
+
+    @media (max-width: 768px) {
+        .studio-layout {
+            grid-template-columns: 1fr;
+            height: auto;
+        }
+        .video-container { height: 320px; }
+        .overlay-reps { font-size: 4rem; }
+        .left-panel { order: 2; }
+        .center-panel { order: 1; }
+    }
+</style>
+
+<div class="studio-layout">
+
+    <!-- ─── LEFT: CONTROLS ─── -->
+    <div class="studio-panel left-panel">
+        <div class="panel-header">
+            <div class="panel-icon" style="background:var(--primary-dim); color:var(--primary);"><i class="fas fa-sliders"></i></div>
+            <h3>Workout Controls</h3>
+        </div>
+        <div class="panel-body">
+
+            <div class="exercise-select-wrap">
+                <label>Exercise</label>
+                <select id="exerciseSelect" class="custom-select">
+                    <option value="none">— Select Exercise —</option>
+                    <option value="bicep_curl">💪 Bicep Curl</option>
+                    <option value="squat">🏋️ Squat</option>
+                    <option value="pushup">📤 Push Up</option>
+                    <option value="shoulder_press">🏋️ Shoulder Press</option>
+                    <option value="lunge">🦵 Lunge</option>
+                    <option value="deadlift">💪 Deadlift</option>
+                    <option value="leg_raise">🦵 Leg Raise</option>
+                    <option value="lateral_raise">💪 Lateral Raise</option>
+                    <option value="plank">🧘 Plank (seconds)</option>
+                </select>
+            </div>
+
+            <div class="ctrl-buttons">
+                <button id="startBtn" class="btn btn-primary" style="width:100%">
+                    <i class="fas fa-play"></i> Start
+                </button>
+                <button id="resetBtn" class="btn btn-secondary" style="width:100%">
+                    <i class="fas fa-rotate"></i> Reset
+                </button>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="section-label">Live Stats</div>
+
+            <div style="text-align:center; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.25rem; margin-bottom:0.75rem;">
+                <div class="live-stat-label" style="margin-bottom:0.5rem;">Current Reps</div>
+                <div class="rep-counter-big" id="statReps">0</div>
+                <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;">Exercise: <span id="statEx" style="color:var(--text-secondary);">—</span></div>
+            </div>
+
+            <div class="live-stat-block">
+                <div class="live-stat-label">Calories Burned</div>
+                <div class="live-stat-value"><span id="statCals">0</span> <span style="font-size:0.9rem; color:var(--text-muted);">kcal</span></div>
+            </div>
+
+            <div class="feedback-box">
+                <div class="feedback-dot" id="feedbackDot"></div>
+                <div class="feedback-text" id="statFeedback">Select an exercise and click Start.</div>
+            </div>
+
+            <div class="debug-badge" id="debugInfo">Ready</div>
+
+            <div class="divider"></div>
+
+            <div class="section-label">Session History</div>
+            <div id="historyList" style="font-size:0.8rem;">
+                <div class="skeleton" style="height:40px; margin-bottom:0.5rem;"></div>
+                <div class="skeleton" style="height:40px;"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ─── CENTER: CAMERA ─── -->
+    <div class="studio-panel center-panel">
+        <div class="video-top-bar">
+            <div class="session-status">
+                <div class="status-dot" id="statusDot"></div>
+                <span class="status-text" id="statusText">Idle</span>
+            </div>
+            <div class="video-meta-badges">
+                <span class="meta-badge" id="badgeExercise">No Exercise</span>
+                <span class="meta-badge live" id="badgeLive" style="display:none;"><i class="fas fa-circle" style="font-size:0.5rem;"></i> LIVE</span>
+                <span class="meta-badge" id="badgeFps">— fps</span>
+            </div>
+        </div>
+
+        <div class="video-wrapper">
+            <div class="video-container" id="videoContainer">
+                <!-- Camera placeholder -->
+                <div class="camera-placeholder" id="cameraPlaceholder">
+                    <div class="camera-placeholder-icon"><i class="fas fa-video"></i></div>
+                    <h3>AI Motion Tracking Studio</h3>
+                    <p>Select an exercise and click <strong>Start</strong> to begin pose detection.</p>
+                </div>
+
+                <!-- Overlays -->
+                <div class="angle-badge" id="angleDisplay">Angle: --°</div>
+                <div class="form-score-badge" id="formScore">Form ✓</div>
+                <div class="overlay-reps" id="overlayReps">0</div>
+
+                <!-- Video + Canvas -->
+                <video id="videoElement" autoplay playsinline></video>
+                <canvas id="poseCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── RIGHT: ANALYTICS ─── -->
+    <div class="studio-panel right-panel">
+        <div class="panel-header">
+            <div class="panel-icon" style="background:rgba(168,85,247,0.15); color:#A855F7;"><i class="fas fa-chart-line"></i></div>
+            <h3>Live Analytics</h3>
+        </div>
+        <div class="panel-body">
+
+            <div class="section-label">Movement Quality</div>
+
+            <div class="analytics-metric">
+                <div class="analytics-metric-header">
+                    <span class="analytics-metric-label">Form Score</span>
+                    <span class="analytics-metric-value" id="formScoreVal">—</span>
+                </div>
+                <div class="progress-bar-track">
+                    <div class="progress-bar-fill" id="formScoreBar" style="width:0%; background:var(--success);"></div>
+                </div>
+            </div>
+
+            <div class="analytics-metric">
+                <div class="analytics-metric-header">
+                    <span class="analytics-metric-label">Rep Quality</span>
+                    <span class="analytics-metric-value" id="repQualityVal">—</span>
+                </div>
+                <div class="progress-bar-track">
+                    <div class="progress-bar-fill" id="repQualityBar" style="width:0%; background:var(--primary);"></div>
+                </div>
+            </div>
+
+            <div class="analytics-metric">
+                <div class="analytics-metric-header">
+                    <span class="analytics-metric-label">Confidence</span>
+                    <span class="analytics-metric-value" id="confidenceVal">—</span>
+                </div>
+                <div class="progress-bar-track">
+                    <div class="progress-bar-fill" id="confidenceBar" style="width:0%; background:var(--warning);"></div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+            <div class="section-label">Joint Angles</div>
+
+            <div class="joint-grid">
+                <div class="joint-card">
+                    <div class="joint-card-label">Primary</div>
+                    <div class="joint-card-value" id="jointPrimary">—°</div>
+                </div>
+                <div class="joint-card">
+                    <div class="joint-card-label">Secondary</div>
+                    <div class="joint-card-value" id="jointSecondary">—°</div>
+                </div>
+                <div class="joint-card">
+                    <div class="joint-card-label">Left</div>
+                    <div class="joint-card-value" id="jointLeft">—°</div>
+                </div>
+                <div class="joint-card">
+                    <div class="joint-card-label">Right</div>
+                    <div class="joint-card-value" id="jointRight">—°</div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+            <div class="section-label">Rep History</div>
+
+            <div id="repHistoryList">
+                <div style="color:var(--text-muted); font-size:0.8rem; text-align:center; padding:1rem;">No reps yet</div>
+            </div>
+
+            <div class="divider"></div>
+            <div class="section-label">AI Tip</div>
+            <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:0.875rem;">
+                <p style="font-size:0.78rem; margin:0;" id="aiTipText">Start your workout to receive real-time AI coaching feedback.</p>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+    (function() {
+        const video = document.getElementById('videoElement');
+        const canvas = document.getElementById('poseCanvas');
+        const ctx = canvas.getContext('2d');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const exerciseSelect = document.getElementById('exerciseSelect');
+        const angleDisplay = document.getElementById('angleDisplay');
+        const cameraPlaceholder = document.getElementById('cameraPlaceholder');
+        const debugSpan = document.getElementById('debugInfo');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const badgeLive = document.getElementById('badgeLive');
+        const badgeExercise = document.getElementById('badgeExercise');
+        const badgeFps = document.getElementById('badgeFps');
+
+        let stream = null;
+        let processing = false;
+        let sessionActive = false;
+        let lastReps = 0;
+        let animationId = null;
+        let repHistory = [];
+        let lastFrameTime = Date.now();
+        let frameCount = 0;
+
+        function debug(msg) {
+            console.log(msg);
+            debugSpan.innerText = msg;
+            setTimeout(() => { if (debugSpan.innerText === msg) debugSpan.innerText = "Ready"; }, 4000);
+        }
+
+        function setStatus(active) {
+            statusDot.className = 'status-dot' + (active ? ' active' : '');
+            statusText.textContent = active ? 'Recording' : 'Idle';
+            badgeLive.style.display = active ? 'inline-flex' : 'none';
+        }
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            const errMsg = "Camera API unavailable. Use http://localhost:5000 or HTTPS.";
+            debug(errMsg);
+            cameraPlaceholder.innerHTML = `
+                <div class="camera-placeholder-icon" style="color:var(--danger);"><i class="fas fa-exclamation-triangle"></i></div>
+                <h3>Camera Unavailable</h3>
+                <p>${errMsg}<br><br>URL: <code>${window.location.href}</code></p>
+                <button onclick="location.reload()" class="btn btn-primary btn-sm" style="margin-top:0.5rem;">Retry</button>
+            `;
+            startBtn.disabled = true;
+            return;
+        }
+
+        let synth = window.speechSynthesis;
+        let lastSpoken = "";
+        let lastSpokenTime = 0;
+        function speak(message) {
+            if (!synth) return;
+            let now = Date.now() / 1000;
+            if (message === lastSpoken && now - lastSpokenTime < 2) return;
+            lastSpoken = message;
+            lastSpokenTime = now;
+            let utterance = new SpeechSynthesisUtterance(message);
+            utterance.rate = 0.9;
+            synth.cancel();
+            synth.speak(utterance);
+        }
+
+        const POSE_CONNECTIONS = [
+            [0,1],[1,2],[2,3],[3,7],[0,4],[4,5],[5,6],[6,8],[9,10],
+            [11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],
+            [23,24],[23,25],[25,27],[27,29],[29,31],[24,26],[26,28],[28,30],[30,32]
+        ];
+
+        function drawLandmarks(landmarks, canvasWidth, canvasHeight, anglesData) {
+            if (!landmarks || landmarks.length === 0) return;
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            // Skeleton connections
+            ctx.lineWidth = 2.5;
+            for (let conn of POSE_CONNECTIONS) {
+                const p1 = landmarks[conn[0]];
+                const p2 = landmarks[conn[1]];
+                if (p1 && p2 && p1.visibility > 0.5 && p2.visibility > 0.5) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+                    ctx.moveTo(p1.x * canvasWidth, p1.y * canvasHeight);
+                    ctx.lineTo(p2.x * canvasWidth, p2.y * canvasHeight);
+                    ctx.stroke();
+                }
+            }
+
+            // Landmarks
+            for (let i = 0; i < landmarks.length; i++) {
+                const lm = landmarks[i];
+                if (lm && lm.visibility > 0.05) {
+                    const color = lm.color || '#3B82F6';
+                    ctx.beginPath();
+                    ctx.fillStyle = color;
+                    ctx.arc(lm.x * canvasWidth, lm.y * canvasHeight, 6, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                }
+            }
+
+            // Angle labels
+            if (anglesData && anglesData.length) {
+                ctx.font = "bold 13px 'DM Mono', monospace";
+                for (let angleInfo of anglesData) {
+                    let lm = null;
+                    if (angleInfo.landmark_id !== undefined) {
+                        lm = landmarks[angleInfo.landmark_id];
+                    } else if (angleInfo.position) {
+                        lm = { x: angleInfo.position.x, y: angleInfo.position.y, visibility: 1 };
+                    }
+                    if (lm && lm.visibility > 0.1) {
+                        let x = lm.x * canvasWidth;
+                        let y = lm.y * canvasHeight;
+                        // Background pill
+                        const text = `${angleInfo.name}: ${Math.round(angleInfo.angle)}°`;
+                        const w = ctx.measureText(text).width + 12;
+                        ctx.fillStyle = 'rgba(11,18,32,0.8)';
+                        ctx.beginPath();
+                        ctx.roundRect(x + 10, y - 22, w, 20, 4);
+                        ctx.fill();
+                        ctx.fillStyle = '#FDE68A';
+                        ctx.fillText(text, x + 16, y - 7);
+                    }
+                }
+            }
+
+            // Update joint cards
+            if (anglesData && anglesData.length > 0) {
+                document.getElementById('jointPrimary').textContent = Math.round(anglesData[0]?.angle || 0) + '°';
+                if (anglesData[1]) document.getElementById('jointSecondary').textContent = Math.round(anglesData[1].angle) + '°';
+                if (anglesData[2]) document.getElementById('jointLeft').textContent = Math.round(anglesData[2].angle) + '°';
+                if (anglesData[3]) document.getElementById('jointRight').textContent = Math.round(anglesData[3].angle) + '°';
+            }
+
+            // FPS
+            frameCount++;
+            const now = Date.now();
+            if (now - lastFrameTime >= 1000) {
+                badgeFps.textContent = frameCount + ' fps';
+                frameCount = 0;
+                lastFrameTime = now;
+            }
+        }
+
+        function updateAnalytics(data) {
+            // Form score (simulated from feedback)
+            const feedback = data.feedback || '';
+            let formScore = 90;
+            if (feedback.toLowerCase().includes('straight') || feedback.toLowerCase().includes('keep')) formScore = 75;
+            if (feedback.toLowerCase().includes('good') || feedback.toLowerCase().includes('great')) formScore = 95;
+
+            document.getElementById('formScoreVal').textContent = formScore + '%';
+            document.getElementById('formScoreBar').style.width = formScore + '%';
+            document.getElementById('formScoreBar').style.background = formScore > 85 ? 'var(--success)' : formScore > 70 ? 'var(--warning)' : 'var(--danger)';
+
+            const repQ = Math.min(100, 70 + (data.reps || 0) * 2);
+            document.getElementById('repQualityVal').textContent = repQ + '%';
+            document.getElementById('repQualityBar').style.width = repQ + '%';
+
+            // Confidence from landmarks
+            const avgVis = data.landmarks ? data.landmarks.reduce((a, l) => a + (l?.visibility || 0), 0) / data.landmarks.length : 0;
+            const conf = Math.round(avgVis * 100);
+            document.getElementById('confidenceVal').textContent = conf + '%';
+            document.getElementById('confidenceBar').style.width = conf + '%';
+        }
+
+        function addRepToHistory(repNum) {
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            repHistory.unshift({ num: repNum, time });
+            if (repHistory.length > 8) repHistory.pop();
+
+            const container = document.getElementById('repHistoryList');
+            container.innerHTML = repHistory.map((r, i) => `
+                <div class="rep-history-item">
+                    <span class="rep-history-num">Rep #${r.num}</span>
+                    <span class="rep-quality" style="color:${i === 0 ? 'var(--success)' : 'var(--text-muted)'}">
+                        ${i === 0 ? '✓ Latest' : ''}
+                    </span>
+                    <span class="rep-history-time">${r.time}</span>
+                </div>`).join('');
+        }
+
+        async function startCamera() {
+            debug("Requesting camera...");
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+                video.srcObject = stream;
+                await video.play();
+                debug("✅ Camera started");
+                cameraPlaceholder.style.display = 'none';
+                video.style.display = 'block';
+                canvas.style.display = 'block';
+                document.getElementById('overlayReps').style.display = 'block';
+                document.getElementById('formScore').style.display = 'block';
+                angleDisplay.style.display = 'block';
+                video.addEventListener('loadedmetadata', () => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                });
+                startProcessing();
+                return true;
+            } catch (err) {
+                debug(`Camera error: ${err.name} - ${err.message}`);
+                cameraPlaceholder.innerHTML = `
+                    <div class="camera-placeholder-icon" style="color:var(--danger);"><i class="fas fa-exclamation-triangle"></i></div>
+                    <h3>Camera Error</h3>
+                    <p>${err.message}<br><br>Ensure you're on <strong>http://localhost:5000</strong>, camera is not in use, and browser permissions are granted.</p>
+                    <button onclick="location.reload()" class="btn btn-primary btn-sm" style="margin-top:0.5rem;">Reload & Retry</button>
+                `;
+                return false;
+            }
+        }
+
+        async function sendFrame() {
+            if (!processing || !sessionActive || !video.srcObject || video.readyState !== video.HAVE_ENOUGH_DATA || video.videoWidth === 0) {
+                if (animationId) requestAnimationFrame(sendFrame);
+                return;
+            }
+            if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+            }
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = canvas.toDataURL('image/jpeg', 0.7);
+
+            try {
+                const response = await fetch('/process_frame', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: imageData })
+                });
+                const data = await response.json();
+                if (data.reps !== undefined) {
+                    document.getElementById('statReps').innerText = data.reps;
+                    document.getElementById('overlayReps').innerText = data.reps;
+                    document.getElementById('statCals').innerText = data.calories.toFixed(1);
+                    document.getElementById('statFeedback').innerText = data.feedback;
+
+                    if (data.reps > lastReps) {
+                        speak(`${data.reps}`);
+                        addRepToHistory(data.reps);
+                        document.getElementById('statReps').style.color = 'var(--success)';
+                        setTimeout(() => document.getElementById('statReps').style.color = '', 400);
+                    }
+                    if (data.feedback && (data.feedback.includes("elbow") || data.feedback.includes("back") || data.feedback.includes("body"))) {
+                        speak(data.feedback);
+                    }
+                    lastReps = data.reps;
+
+                    if (data.landmarks) {
+                        drawLandmarks(data.landmarks, canvas.width, canvas.height, data.angles || []);
+                        if (data.angle) {
+                            angleDisplay.innerText = `Angle: ${Math.round(data.angle)}°`;
+                        }
+                    } else {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        angleDisplay.innerText = "Angle: --°";
+                    }
+
+                    updateAnalytics(data);
+
+                    // AI tip
+                    if (data.feedback) {
+                        document.getElementById('aiTipText').textContent = data.feedback;
+                    }
+
+                } else if (data.error) {
+                    debug("Server error: " + data.error);
+                }
+            } catch (err) {
+                debug("Network error: " + err.message);
+            }
+            if (animationId) requestAnimationFrame(sendFrame);
+        }
+
+        function startProcessing() {
+            if (animationId) cancelAnimationFrame(animationId);
+            processing = true;
+            animationId = requestAnimationFrame(sendFrame);
+        }
+
+        async function startWorkout() {
+            const exercise = exerciseSelect.value;
+            if (exercise === 'none') {
+                alert('Please select an exercise first.');
+                return;
+            }
+            if (!stream) {
+                const ok = await startCamera();
+                if (!ok) return;
+                await new Promise(r => setTimeout(r, 500));
+            }
+            const response = await fetch('/set_exercise', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'exercise=' + encodeURIComponent(exercise)
+            });
+            const data = await response.json();
+            if (data.status === 'success') {
+                sessionActive = true;
+                setStatus(true);
+                const exLabel = exerciseSelect.options[exerciseSelect.selectedIndex].text;
+                document.getElementById('statFeedback').innerText = 'Started! Go for it!';
+                document.getElementById('statEx').innerText = exLabel;
+                badgeExercise.textContent = exLabel;
+                speak(`Starting ${exLabel}`);
+            } else {
+                debug("Exercise start failed: " + JSON.stringify(data));
+            }
+        }
+
+        async function resetWorkout() {
+            await fetch('/reset_workout', { method: 'POST' });
+            sessionActive = false;
+            setStatus(false);
+            document.getElementById('statReps').innerText = '0';
+            document.getElementById('overlayReps').innerText = '0';
+            document.getElementById('statCals').innerText = '0';
+            document.getElementById('statFeedback').innerText = 'Workout reset.';
+            document.getElementById('statEx').innerText = '—';
+            badgeExercise.textContent = 'No Exercise';
+            repHistory = [];
+            document.getElementById('repHistoryList').innerHTML = '<div style="color:var(--text-muted); font-size:0.8rem; text-align:center; padding:1rem;">No reps yet</div>';
+            updateHistory();
+            if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+            angleDisplay.innerText = "Angle: --°";
+            lastReps = 0;
+            ['formScoreVal','repQualityVal','confidenceVal'].forEach(id => document.getElementById(id).textContent = '—');
+            ['formScoreBar','repQualityBar','confidenceBar'].forEach(id => document.getElementById(id).style.width = '0%');
+            ['jointPrimary','jointSecondary','jointLeft','jointRight'].forEach(id => document.getElementById(id).textContent = '—°');
+        }
+
+        async function updateHistory() {
+            const response = await fetch('/get_history');
+            const data = await response.json();
+            const container = document.getElementById('historyList');
+            if (!data || data.length === 0) {
+                container.innerHTML = '<p style="color:var(--text-muted); font-size:0.8rem; text-align:center;">No workouts yet.</p>';
+                return;
+            }
+            container.innerHTML = data.slice(0, 8).map(w => {
+                const date = new Date(w.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                return `<div class="history-item">
+                    <strong>${w.exercise || 'Workout'}</strong>
+                    <span>${date} · <span style="color:var(--primary)">${w.reps} reps</span> · ${Math.round(w.calories)} kcal · ${w.duration}s</span>
+                </div>`;
+            }).join('');
+        }
+
+        startBtn.addEventListener('click', startWorkout);
+        resetBtn.addEventListener('click', resetWorkout);
+        updateHistory();
+        setInterval(updateHistory, 10000);
+    })();
+</script>
+{% endblock %}

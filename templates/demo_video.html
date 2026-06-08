@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Fitness Demo</title>
+    <style>
+        body { font-family: monospace; background: #1a1a2e; color: white; padding: 20px; }
+        .demo-container { max-width: 800px; margin: 0 auto; text-align: center; }
+        .pose-demo { background: #0f0f1a; padding: 20px; border-radius: 10px; margin: 20px 0; }
+        .rep-counter { font-size: 48px; font-weight: bold; color: #00cdac; }
+        .form-feedback { color: #00ff00; }
+        button { background: #00cdac; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>🎥 AI Fitness Tracker - Demo Mode</h1>
+        <p>Camera works perfectly on <strong>localhost</strong> (http://127.0.0.1:5000)</p>
+        <p>On cloud, rep counting works manually:</p>
+        
+        <div class="pose-demo">
+            <div>🎯 Bicep Curl Demo</div>
+            <div class="rep-counter" id="demoReps">0</div>
+            <div class="form-feedback" id="demoFeedback">Click "Simulate Rep"</div>
+            <button onclick="simulateRep()">💪 Simulate One Rep</button>
+            <button onclick="resetDemo()">🔄 Reset</button>
+        </div>
+        
+        <p>📹 <a href="https://youtu.be/your-demo-video">Watch Full Demo Video</a> | 
+        🐙 <a href="https://github.com/pn-dev-in/AI-Powered-Fitness-Tracking-System">GitHub Repo</a></p>
+    </div>
+    
+    <script>
+        let demoReps = 0;
+        function simulateRep() {
+            demoReps++;
+            document.getElementById('demoReps').innerText = demoReps;
+            document.getElementById('demoFeedback').innerText = "✅ Good form! Rep " + demoReps;
+            document.getElementById('demoFeedback').style.color = "#00ff00";
+            setTimeout(() => {
+                document.getElementById('demoFeedback').innerText = "Ready for next rep!";
+            }, 1500);
+        }
+        function resetDemo() {
+            demoReps = 0;
+            document.getElementById('demoReps').innerText = "0";
+            document.getElementById('demoFeedback').innerText = "Reset! Start simulating!";
+        }
+    </script>
+</body>
+</html>

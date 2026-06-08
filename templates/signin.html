@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    /* Override container for auth pages — full-bleed split screen */
+    .app-shell { min-height: calc(100vh - var(--nav-h)); }
+    .app-shell > .container {
+        max-width: 100%;
+        padding: 0;
+        display: flex;
+        flex: 1;
+    }
+
+    .auth-split {
+        display: flex;
+        width: 100%;
+        min-height: calc(100vh - var(--nav-h));
+    }
+
+    /* ── LEFT: Marketing ── */
+    .auth-left {
+        flex: 1;
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+        padding: 64px 56px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 40px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auth-left::before {
+        content: '';
+        position: absolute;
+        top: -120px;
+        right: -80px;
+        width: 400px;
+        height: 400px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .auth-left::after {
+        content: '';
+        position: absolute;
+        bottom: -100px;
+        left: -60px;
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .auth-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .auth-logo-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        background: var(--primary);
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+        color: white;
+    }
+
+    .auth-hero h2 {
+        font-size: clamp(28px, 4vw, 38px);
+        font-weight: 800;
+        letter-spacing: -1px;
+        line-height: 1.15;
+        margin-bottom: 16px;
+        background: linear-gradient(135deg, #f8fafc 40%, #94a3b8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .auth-hero p {
+        font-size: 15px;
+        color: var(--text-2);
+        line-height: 1.7;
+        max-width: 380px;
+    }
+
+    .feature-list {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .feature-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+
+    .feature-text h5 {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 2px;
+        color: var(--text);
+    }
+
+    .feature-text p {
+        font-size: 13px;
+        color: var(--text-2);
+        margin: 0;
+    }
+
+    .trust-row {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding-top: 8px;
+        border-top: 1px solid var(--border);
+    }
+
+    .trust-item {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .trust-number {
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        color: var(--text);
+    }
+
+    .trust-label {
+        font-size: 11px;
+        color: var(--text-3);
+        font-weight: 500;
+    }
+
+    /* ── RIGHT: Form ── */
+    .auth-right {
+        width: 440px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 40px;
+    }
+
+    .auth-form-wrap {
+        width: 100%;
+        max-width: 360px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .auth-form-header {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .auth-form-header h3 {
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+    }
+
+    .auth-form-header p {
+        font-size: 14px;
+        color: var(--text-2);
+    }
+
+    .auth-form { display: flex; flex-direction: column; gap: 0; }
+
+    /* Override input padding for auth */
+    .auth-form .input-wrap input {
+        height: 46px;
+        font-size: 14px;
+    }
+
+    .auth-divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 12px;
+        color: var(--text-3);
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+        .auth-left { display: none; }
+        .auth-right {
+            width: 100%;
+            padding: 32px 24px;
+        }
+        .auth-form-wrap { max-width: 400px; }
+    }
+
+    @media (max-width: 480px) {
+        .auth-right { padding: 24px 16px; align-items: flex-start; padding-top: 32px; }
+    }
+</style>
+
+<div class="auth-split fade-in">
+
+    <!-- LEFT -->
+    <div class="auth-left">
+        <div class="auth-logo">
+            <div class="auth-logo-icon"><i class="fas fa-dumbbell"></i></div>
+            AI Fitness
+        </div>
+
+        <div class="auth-hero">
+            <h2>Your AI-powered<br>fitness operating system.</h2>
+            <p>Real-time pose detection, intelligent rep counting, and a personal AI coach that adapts to you.</p>
+        </div>
+
+        <div class="feature-list">
+            <div class="feature-item">
+                <div class="feature-icon" style="background:var(--primary-dim);color:#60a5fa;">
+                    <i class="fas fa-video"></i>
+                </div>
+                <div class="feature-text">
+                    <h5>AI Pose Detection</h5>
+                    <p>MediaPipe-powered skeleton tracking with real-time form scoring.</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon" style="background:rgba(139,92,246,.12);color:#a78bfa;">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="feature-text">
+                    <h5>Personal AI Coach</h5>
+                    <p>Tailored plans, nutrition advice, and recovery guidance on demand.</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon" style="background:var(--success-dim);color:#4ade80;">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="feature-text">
+                    <h5>Advanced Analytics</h5>
+                    <p>Trend charts, PRs, heatmaps, and performance insights.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="trust-row">
+            <div class="trust-item">
+                <div class="trust-number">33</div>
+                <div class="trust-label">Body landmarks</div>
+            </div>
+            <div class="trust-item">
+                <div class="trust-number">9+</div>
+                <div class="trust-label">Exercises tracked</div>
+            </div>
+            <div class="trust-item">
+                <div class="trust-number">100%</div>
+                <div class="trust-label">AI-powered</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="auth-right">
+        <div class="auth-form-wrap">
+
+            <div class="auth-form-header">
+                <h3>Welcome back</h3>
+                <p>Sign in to your account to continue.</p>
+            </div>
+
+            {% if error %}
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST" class="auth-form" style="gap:14px;">
+                <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label">Email address</label>
+                    <div class="input-wrap">
+                        <span class="input-icon"><i class="fas fa-envelope"></i></span>
+                        <input type="email" name="email" placeholder="you@example.com" required autocomplete="email">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label">Password</label>
+                    <div class="input-wrap">
+                        <span class="input-icon"><i class="fas fa-lock"></i></span>
+                        <input type="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg btn-full" style="margin-top:4px;">
+                    Sign In <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="auth-divider">or</div>
+
+            <p class="text-sm text-center" style="color:var(--text-2);">
+                Don't have an account?
+                <a href="/signup" style="color:var(--primary);font-weight:600;text-decoration:none;">Create one free →</a>
+            </p>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

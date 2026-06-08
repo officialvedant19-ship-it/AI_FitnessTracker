@@ -1,0 +1,518 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .dashboard-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .greeting-text {
+        font-size: clamp(1.5rem, 3vw, 2.25rem);
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        line-height: 1.2;
+    }
+
+    .greeting-sub {
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin-top: 4px;
+    }
+
+    .date-pill {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 14px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 100px;
+        font-size: 0.8rem;
+        color: var(--muted);
+        white-space: nowrap;
+    }
+
+    /* Stats row */
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem 1.5rem;
+        transition: border-color 0.2s, transform 0.2s;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        border-radius: 2px 2px 0 0;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .stat-card:hover { border-color: #475569; transform: translateY(-2px); }
+    .stat-card:hover::before { opacity: 1; }
+    .stat-card.blue::before { background: var(--primary); }
+    .stat-card.green::before { background: var(--success); }
+    .stat-card.amber::before { background: var(--warning); }
+    .stat-card.purple::before { background: #A78BFA; }
+
+    .stat-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+        display: grid;
+        place-items: center;
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-icon.blue  { background: rgba(59,130,246,0.15);  color: #93C5FD; }
+    .stat-icon.green { background: rgba(34,197,94,0.15);   color: #86EFAC; }
+    .stat-icon.amber { background: rgba(245,158,11,0.15);  color: #FCD34D; }
+    .stat-icon.purple{ background: rgba(167,139,250,0.15); color: #C4B5FD; }
+
+    .stat-val {
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: -1px;
+        line-height: 1;
+        margin-bottom: 4px;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .stat-lbl {
+        font-size: 0.78rem;
+        color: var(--muted);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    /* Quick Actions */
+    .actions-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .action-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: border-color 0.2s, transform 0.2s, background 0.2s;
+        text-decoration: none;
+        display: block;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .action-card:hover {
+        border-color: var(--primary);
+        transform: translateY(-3px);
+        background: rgba(59,130,246,0.04);
+    }
+
+    .action-card .action-arrow {
+        position: absolute;
+        top: 1.25rem;
+        right: 1.25rem;
+        width: 28px;
+        height: 28px;
+        border-radius: 7px;
+        background: transparent;
+        border: 1px solid var(--border);
+        display: grid;
+        place-items: center;
+        font-size: 0.7rem;
+        color: var(--muted);
+        transition: all 0.2s;
+    }
+
+    .action-card:hover .action-arrow {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #fff;
+    }
+
+    .action-icon-wrap {
+        width: 44px;
+        height: 44px;
+        border-radius: 11px;
+        display: grid;
+        place-items: center;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        background: var(--primary-dim);
+        color: var(--primary);
+    }
+
+    .action-title {
+        font-weight: 700;
+        font-size: 0.95rem;
+        margin-bottom: 4px;
+        color: var(--text);
+    }
+
+    .action-sub {
+        font-size: 0.8rem;
+        color: var(--muted);
+        line-height: 1.4;
+    }
+
+    /* Bottom row */
+    .bottom-row {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 1.25rem;
+    }
+
+    /* Workout table */
+    .workout-table-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.25rem;
+    }
+
+    .workout-row {
+        display: grid;
+        grid-template-columns: 1fr auto auto auto;
+        gap: 1rem;
+        align-items: center;
+        padding: 0.85rem 0;
+        border-bottom: 1px solid rgba(51,65,85,0.6);
+        transition: background 0.15s;
+        border-radius: 6px;
+    }
+
+    .workout-row:last-child { border-bottom: none; }
+
+    .workout-row:hover {
+        background: rgba(255,255,255,0.02);
+        padding-left: 6px;
+    }
+
+    .workout-name {
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: var(--text);
+    }
+
+    .workout-date {
+        font-size: 0.75rem;
+        color: var(--muted);
+        margin-top: 2px;
+    }
+
+    .workout-stat {
+        font-size: 0.8rem;
+        text-align: right;
+    }
+
+    .workout-stat-val {
+        font-weight: 600;
+        color: var(--text);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .workout-stat-unit {
+        color: var(--muted);
+        font-size: 0.7rem;
+    }
+
+    /* Motivation card */
+    .motivation-card {
+        background: linear-gradient(135deg, rgba(59,130,246,0.12) 0%, rgba(30,41,59,0.8) 60%);
+        border: 1px solid rgba(59,130,246,0.25);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .motivation-quote {
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: var(--text);
+        font-style: italic;
+        margin-bottom: 1rem;
+    }
+
+    /* Streak card */
+    .streak-card {
+        background: linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(30,41,59,0.8) 60%);
+        border: 1px solid rgba(245,158,11,0.2);
+    }
+
+    .streak-val {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--warning);
+        letter-spacing: -2px;
+        line-height: 1;
+    }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+    }
+
+    .empty-state-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        display: grid;
+        place-items: center;
+        font-size: 1.5rem;
+        color: var(--muted);
+        margin: 0 auto 1.25rem;
+    }
+
+    @media (max-width: 1024px) {
+        .stats-row { grid-template-columns: repeat(2, 1fr); }
+        .bottom-row { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+        .actions-row { grid-template-columns: 1fr; }
+        .stats-row { grid-template-columns: repeat(2, 1fr); }
+        .workout-row { grid-template-columns: 1fr auto; }
+        .workout-row .workout-stat:nth-child(3) { display: none; }
+    }
+
+    @media (max-width: 768px) {
+
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .greeting-text {
+        font-size: 1.8rem;
+    }
+
+    .date-pill {
+        margin-top: 10px;
+    }
+}
+</style>
+
+<div class="fade-in">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div>
+            <div class="greeting-text">Welcome back, {{ user.name }} 👋</div>
+            <div class="greeting-sub">Here's your fitness overview for today.</div>
+        </div>
+        <div class="date-pill">
+            <i class="fas fa-calendar-day"></i>
+            <span id="currentDate">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row fade-in fade-in-delay-1">
+        <div class="stat-card blue">
+            <div class="stat-icon blue"><i class="fas fa-calendar-check"></i></div>
+            <div class="stat-val" id="totalWorkouts">—</div>
+            <div class="stat-lbl">Total Workouts</div>
+        </div>
+        <div class="stat-card green">
+            <div class="stat-icon green"><i class="fas fa-repeat"></i></div>
+            <div class="stat-val" id="totalReps">—</div>
+            <div class="stat-lbl">Total Reps</div>
+        </div>
+        <div class="stat-card amber">
+            <div class="stat-icon amber"><i class="fas fa-fire"></i></div>
+            <div class="stat-val" id="totalCalories">—</div>
+            <div class="stat-lbl">Calories Burned</div>
+        </div>
+        <div class="stat-card purple">
+            <div class="stat-icon purple"><i class="fas fa-chart-simple"></i></div>
+            <div class="stat-val" id="avgWorkouts">—</div>
+            <div class="stat-lbl">Avg Reps / Session</div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="actions-row fade-in fade-in-delay-2">
+        <a class="action-card" href="/workout">
+            <div class="action-arrow"><i class="fas fa-arrow-right"></i></div>
+            <div class="action-icon-wrap"><i class="fas fa-play"></i></div>
+            <div class="action-title">Start Workout</div>
+            <div class="action-sub">Real-time AI pose detection with rep counting</div>
+        </a>
+        <a class="action-card" href="/planner">
+            <div class="action-arrow"><i class="fas fa-arrow-right"></i></div>
+            <div class="action-icon-wrap" style="background:rgba(34,197,94,0.1);color:var(--success);"><i class="fas fa-robot"></i></div>
+            <div class="action-title">AI Fitness Coach</div>
+            <div class="action-sub">Personalized advice, plans & nutrition tips</div>
+        </a>
+        <a class="action-card" href="/progress">
+            <div class="action-arrow"><i class="fas fa-arrow-right"></i></div>
+            <div class="action-icon-wrap" style="background:rgba(245,158,11,0.1);color:var(--warning);"><i class="fas fa-chart-line"></i></div>
+            <div class="action-title">View Progress</div>
+            <div class="action-sub">Analytics, trends, and personal records</div>
+        </a>
+    </div>
+
+    <!-- Bottom row -->
+    <div class="bottom-row fade-in fade-in-delay-3">
+        <!-- Recent workouts -->
+        <div class="card">
+            <div class="workout-table-header">
+                <div>
+                    <h3>Recent Workouts</h3>
+                    <p style="font-size:0.8rem;margin-top:2px;">Your last 7 sessions</p>
+                </div>
+                <button onclick="exportData()" class="btn btn-surface btn-sm">
+                    <i class="fas fa-download"></i> Export CSV
+                </button>
+            </div>
+            <div id="recentWorkouts"><div class="loader"></div></div>
+        </div>
+
+        <!-- Right column -->
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+            <!-- Streak -->
+            <div class="card streak-card">
+                <div class="flex items-center justify-between mb-2">
+                    <h4>Workout Streak</h4>
+                    <i class="fas fa-fire" style="color:var(--warning)"></i>
+                </div>
+                <div class="streak-val" id="streakVal">0</div>
+                <div class="stat-lbl mt-1">consecutive days</div>
+                <hr>
+                <p style="font-size:0.8rem;">Keep it going — consistency is everything.</p>
+            </div>
+
+            <!-- Motivation -->
+            <div class="motivation-card">
+                <div class="flex items-center gap-2 mb-3">
+                    <i class="fas fa-lightbulb" style="color:var(--primary)"></i>
+                    <h4>Daily Motivation</h4>
+                </div>
+                <div class="motivation-quote" id="motivationQuote">"The only bad workout is the one that didn't happen."</div>
+                <button onclick="newQuote()" class="btn btn-ghost btn-sm">
+                    <i class="fas fa-arrows-rotate"></i> New Quote
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Date
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+
+    const quotes = [
+        "Success starts with self-discipline.",
+        "Your only limit is you.",
+        "Don't stop when it hurts — stop when you're done.",
+        "The pain you feel today will be the strength you feel tomorrow.",
+        "Motivation gets you started. Habit keeps you going.",
+        "You didn't come this far to only come this far.",
+        "Every rep counts. Every step matters.",
+        "Great things never came from comfort zones.",
+        "Push harder than yesterday if you want a different tomorrow."
+    ];
+
+    function newQuote() {
+        const q = quotes[Math.floor(Math.random() * quotes.length)];
+        const el = document.getElementById('motivationQuote');
+        el.style.opacity = '0';
+        setTimeout(() => { el.textContent = `"${q}"`; el.style.opacity = '1'; el.style.transition = 'opacity 0.3s'; }, 200);
+    }
+
+    function loadDashboard() {
+        fetch('/api/get_workout_stats')
+            .then(r => r.json())
+            .then(data => {
+                const total = data.total_sessions || 0;
+                const reps  = data.total_reps || 0;
+                const cals  = Math.round(data.total_calories || 0);
+                const avg   = total > 0 ? Math.round(reps / total) : 0;
+
+                document.getElementById('totalWorkouts').textContent = total;
+                document.getElementById('totalReps').textContent = reps;
+                document.getElementById('totalCalories').textContent = cals;
+                document.getElementById('avgWorkouts').textContent = avg;
+            });
+
+        fetch('/get_history')
+            .then(r => r.json())
+            .then(data => {
+                const container = document.getElementById('recentWorkouts');
+                if (!data || data.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon"><i class="fas fa-dumbbell"></i></div>
+                            <h4>No workouts yet</h4>
+                            <p style="font-size:0.85rem;margin-top:6px;">Start your first session to see your history here.</p>
+                            <a href="/workout" class="btn btn-primary btn-sm" style="margin-top:1rem;">Start Now</a>
+                        </div>`;
+                    return;
+                }
+
+                // Calculate streak
+                const dates = [...new Set(data.map(w => new Date(w.timestamp).toDateString()))];
+                let streak = 0;
+                const today = new Date();
+                for (let i = 0; i < 365; i++) {
+                    const d = new Date(today);
+                    d.setDate(today.getDate() - i);
+                    if (dates.includes(d.toDateString())) streak++;
+                    else if (i > 0) break;
+                }
+                document.getElementById('streakVal').textContent = streak;
+
+                let html = '';
+                data.slice(0, 7).forEach(w => {
+                    const date = new Date(w.timestamp);
+                    const dateStr = date.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+                    const timeStr = date.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+                    html += `
+                    <div class="workout-row">
+                        <div>
+                            <div class="workout-name">${w.exercise || 'Workout'}</div>
+                            <div class="workout-date">${dateStr} at ${timeStr}</div>
+                        </div>
+                        <div class="workout-stat">
+                            <div class="workout-stat-val">${w.reps || 0}</div>
+                            <div class="workout-stat-unit">reps</div>
+                        </div>
+                        <div class="workout-stat">
+                            <div class="workout-stat-val">${Math.round(w.calories || 0)}</div>
+                            <div class="workout-stat-unit">kcal</div>
+                        </div>
+                        <span class="badge badge-blue">Done</span>
+                    </div>`;
+                });
+                container.innerHTML = html;
+            });
+    }
+
+    loadDashboard();
+    setInterval(loadDashboard, 30000);
+</script>
+{% endblock %}

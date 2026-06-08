@@ -1,0 +1,115 @@
+/* Mobile Responsive Styles - Makes your app look great on phones! */
+
+@media (max-width: 768px) {
+    /* General */
+    body {
+        font-size: 14px;
+    }
+    
+    .container {
+        padding: 10px;
+    }
+    
+    .card {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    /* Navigation */
+    nav {
+        flex-direction: column;
+        padding: 10px;
+    }
+    
+    nav .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    nav a {
+        margin: 5px;
+        font-size: 12px;
+    }
+    
+    /* Buttons */
+    .btn {
+        padding: 8px 15px;
+        font-size: 12px;
+    }
+    
+    /* Dashboard */
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .stat-card {
+        padding: 15px;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+    }
+    
+    /* Workout Page */
+    .workout-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .video-panel {
+        order: 1;
+    }
+    
+    .stats-panel {
+        order: 2;
+    }
+    
+    #overlayReps {
+        font-size: 3rem !important;
+    }
+    
+    /* Progress Page */
+    canvas {
+        max-height: 250px !important;
+    }
+    
+    /* Forms */
+    input, select {
+        font-size: 16px; /* Prevents zoom on iOS */
+        padding: 10px 10px 10px 35px;
+    }
+    
+    /* Chat */
+    .chat-container {
+        height: 400px;
+    }
+    
+    .message-bubble {
+        max-width: 85%;
+        font-size: 12px;
+    }
+    
+    /* Charts */
+    .chart-container {
+        overflow-x: auto;
+    }
+}
+
+/* Touch-friendly buttons */
+@media (hover: none) and (pointer: coarse) {
+    .btn, .action-card, nav a {
+        min-height: 44px;
+        cursor: pointer;
+    }
+    
+    button, .btn {
+        padding: 12px 20px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --glass-bg: rgba(0, 0, 0, 0.3);
+    }
+}
