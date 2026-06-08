@@ -20,10 +20,13 @@ from models.workout import WorkoutSession, ExerciseStat
 app = Flask(__name__)
 
 # Load configuration
-app.config.from_object(config['development'])
+env = os.getenv("FLASK_ENV", "production")
+app.config.from_object(config.get(env, config["production"]))
 
 # Initialize extensions
 Session(app)
+print("DATABASE URI:")
+print(app.config.get("SQLALCHEMY_DATABASE_URI"))
 init_db(app)
 
 # Create tables if they don't exist
