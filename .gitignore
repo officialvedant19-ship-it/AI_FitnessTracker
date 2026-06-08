@@ -9,6 +9,8 @@ env/
 ENV/
 .venv
 
+flask_session/
+
 # Database files
 *.db
 *.sqlite
