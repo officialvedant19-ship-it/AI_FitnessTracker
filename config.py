@@ -12,20 +12,9 @@ class Config:
         "your-super-secret-key-change-this-in-production-2025"
     )
 
-    # MySQL Configuration (Railway)
-
-    MYSQL_HOST = os.environ.get("MYSQLHOST")
-    MYSQL_PORT = os.environ.get("MYSQLPORT", "3306")
-    MYSQL_USER = os.environ.get("MYSQLUSER")
-    MYSQL_PASSWORD = os.environ.get("MYSQLPASSWORD")
-    MYSQL_DB = os.environ.get("MYSQLDATABASE")
-
-    # SQLAlchemy Database URI
-
     SQLALCHEMY_DATABASE_URI = (
-        f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}"
-        f"@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB}"
-        "?charset=utf8mb4"
+        os.environ.get("MYSQL_URL")
+        .replace("mysql://", "mysql+pymysql://", 1)
     )
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
