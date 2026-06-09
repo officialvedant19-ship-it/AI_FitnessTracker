@@ -25,7 +25,7 @@ RUN useradd -m -u 1000 fitness && chown -R fitness:fitness /app
 USER fitness
 
 # Expose port
-EXPOSE 8080
+EXPOSE 5000
 
 # Run with gunicorn
-CMD sh -c "gunicorn --bind 0.0.0.0:${PORT:-8080} --workers 1 app:app"
+CMD ["gunicorn", "--worker-class", "eventlet", "-w", "1", "--bind", "0.0.0.0:5000", "app:app"]

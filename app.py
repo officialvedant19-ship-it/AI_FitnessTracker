@@ -28,26 +28,18 @@ app.config.from_object(config.get(env, config["production"]))
 Session(app)
 init_db(app)
 
-# Initialize database and create demo user
+# Create tables if they don't exist
 with app.app_context():
-    try:
-        db.create_all()
-        print("✅ Database tables created successfully")
-
-        if User.query.count() == 0:
-            demo_user = User(
-                email="demo@fit.com",
-                name="Demo User"
-            )
-            demo_user.set_password("password")
-
-            db.session.add(demo_user)
-            db.session.commit()
-
-            print("✅ Demo user created")
-
-    except Exception as e:
-        print(f"❌ Database initialization error: {e}")
+    db.create_all()
+    print("✅ Database tables created/verified")
+    
+    # Create demo user if no users exist
+    if User.query.count() == 0:
+        demo_user = User(email="demo@fit.com", name="Demo User")
+        demo_user.set_password("password")
+        db.session.add(demo_user)
+        db.session.commit()
+        print("✅ Demo user created: demo@fit.com / password")
 
 # ---------------- MediaPipe setup ----------------
 mp_drawing = mp.solutions.drawing_utils
