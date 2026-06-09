@@ -5,12 +5,13 @@
 PoseTrack AI is a full-stack AI-powered fitness tracking platform that uses computer vision and pose estimation to analyze body movements in real time. The system tracks exercises, counts repetitions automatically, provides form feedback, calculates calories burned, and maintains workout history through an interactive web dashboard.
 
 Built using Flask, MediaPipe, OpenCV, and modern web technologies, PoseTrack AI acts as a virtual fitness assistant capable of helping users monitor and improve workout performance directly through their webcam.
+
 ---
 
 ## 🎥 Demo
 
 <p align="center">
-  <a href="[https://youtu.be/YOUR_VIDEO_LINK](https://youtu.be/etn5ok5JK7A)">
+  <a href="https://youtu.be/etn5ok5JK7A">
     <img src="assets/thumbnail.png" alt="PoseTrack AI Demo" width="900">
   </a>
 </p>
