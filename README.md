@@ -5,18 +5,19 @@
 PoseTrack AI is a full-stack AI-powered fitness tracking platform that uses computer vision and pose estimation to analyze body movements in real time. The system tracks exercises, counts repetitions automatically, provides form feedback, calculates calories burned, and maintains workout history through an interactive web dashboard.
 
 Built using Flask, MediaPipe, OpenCV, and modern web technologies, PoseTrack AI acts as a virtual fitness assistant capable of helping users monitor and improve workout performance directly through their webcam.
-> ⚠️ Note: Real-time webcam exercise tracking is fully supported on localhost. The Render deployment is intended for dashboard and application demonstration purposes.
 ---
 
-## 🌐 Live Demo
+## 🎥 Demo
 
-**Application:** https://posetrackai.onrender.com/
+<p align="center">
+  <a href="[https://youtu.be/YOUR_VIDEO_LINK](https://youtu.be/etn5ok5JK7A)">
+    <img src="assets/thumbnail.png" alt="PoseTrack AI Demo" width="900">
+  </a>
+</p>
 
-**Demo Credentials**
-
-Email: `demo@fit.com`
-
-Password: `password`
+<p align="center">
+  <b>▶️ Click the image to watch the full demonstration</b>
+</p>
 
 ---
 
@@ -58,12 +59,6 @@ Supports automatic repetition counting for:
 
 * Export workout history to CSV
 * Download performance reports
-
-### ☁️ Cloud Deployment
-
-* Hosted on Render
-* Docker-ready architecture
-* Production deployment configuration included
 
 ---
 
@@ -125,22 +120,7 @@ Analytics Dashboard
 * SQLite
 * CSV Export Support
 
-## Deployment & DevOps
-
-* Docker
-* Docker Compose
-* Render
-* GitHub
-
 ---
-
-## 📷 Camera Access Notice
-
-### Localhost vs Cloud Deployment
-
-PoseTrack AI uses real-time webcam input for pose estimation and exercise tracking.
-
-Due to browser security restrictions and limitations of cloud hosting platforms such as Render, webcam-based exercise tracking may not function correctly in the deployed version of the application.
 
 ### Supported Environment
 
@@ -151,20 +131,6 @@ Due to browser security restrictions and limitations of cloud hosting platforms 
 * Exercise tracking
 * Rep counting
 * Form analysis
-
-### Render Deployment
-
-⚠️ The Render deployment is provided for demonstration purposes only.
-
-Features such as:
-
-* User Authentication
-* Dashboard
-* Workout History
-* Analytics
-* Data Management
-
-work correctly on the hosted application, but real-time webcam tracking is best experienced when running the project locally.
 
 ### To Experience the Complete Application
 
@@ -231,26 +197,29 @@ PoseTrack-AI/
 
 # 📸 Application Screenshots
 
-### Signin Page
-<img width="1916" height="944" alt="image" src="https://github.com/user-attachments/assets/182908fe-d0c5-4846-8c11-8f86638a79a3" />
+### Signup Page
+<img width="1919" height="1020" alt="Screenshot 2026-06-09 154012" src="https://github.com/user-attachments/assets/dd081006-1810-4641-87da-dfcfafb60e94" />
 
+
+### Signin Page
+<img width="1919" height="1010" alt="Screenshot 2026-06-09 153952" src="https://github.com/user-attachments/assets/791bc95c-22b1-4b09-a5ad-29bc6412512d" />
 
 ### Dashboard
 
-<img width="1916" height="970" alt="image" src="https://github.com/user-attachments/assets/fb90caca-b22e-467d-8c35-442612d76e8c" />
-
+<img width="1919" height="1012" alt="Screenshot 2026-06-09 154056" src="https://github.com/user-attachments/assets/ac651e69-05ab-4204-aee0-fa0639f89ad7" />
 
 ### Live Exercise Tracking
+<img width="1919" height="1017" alt="Screenshot 2026-06-09 154514" src="https://github.com/user-attachments/assets/fe14dfa7-6ee4-4ed9-b82c-c6c0046598cf" />
+<img width="905" height="484" alt="Screenshot 2026-06-09 154444" src="https://github.com/user-attachments/assets/da2a6ed1-ba4f-45db-95ad-9570aed56ed0" />
 
-(Add Screenshot)
 
-### Workout History
-
-(Add Screenshot)
+### AI Coach
+<img width="1919" height="1017" alt="Screenshot 2026-06-09 154531" src="https://github.com/user-attachments/assets/cfbe1f5a-c4df-4b51-be21-6e3f3302823c" />
 
 ### Analytics Dashboard
+<img width="1919" height="1012" alt="Screenshot 2026-06-09 154630" src="https://github.com/user-attachments/assets/ec2fc1ea-49b5-49f1-9c46-bef4bca44508" />
+<img width="1919" height="1016" alt="Screenshot 2026-06-09 154551" src="https://github.com/user-attachments/assets/3ea5d36a-16cb-4ef1-b138-90930c29580f" />
 
-(Add Screenshot)
 
 ---
 
@@ -397,8 +366,6 @@ This project showcases practical experience in:
 # 👨‍💻 Author
 
 ### Pravesh Nandanwar
-
-Computer Science & Engineering Student
 
 GitHub: https://github.com/pn-dev-in
 
