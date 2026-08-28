@@ -15,13 +15,13 @@ class Config:
     MYSQL_DB = os.environ.get('MYSQL_DB', 'fitness_db')
     
     # Database URI
-    SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}/{MYSQL_DB}?charset=utf8mb4"
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_size': 10,
         'pool_recycle': 3600,
         'pool_pre_ping': True,
-    }
+        }
     
     # Session
     SESSION_TYPE = 'filesystem'
